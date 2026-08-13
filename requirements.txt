@@ -1,0 +1,6 @@
+fastapi
+gspread
+google-auth
+pandas
+requests
+pydantic

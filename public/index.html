@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Horário RSP</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #0e1117;
+      color: #ffffff;
+      font-family: 'Inter', sans-serif;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .container { max-width: 600px; width: 100%; margin-top: 20px; }
+    h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 4px; }
+    p.caption { color: rgba(255, 255, 255, 0.6); margin-bottom: 24px; font-size: 0.95rem; }
+    
+    .input-group { margin-bottom: 24px; }
+    label { display: block; margin-bottom: 8px; font-weight: 500; }
+    input[type="text"] {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      transition: border 0.2s;
+    }
+    input[type="text"]:focus { border-color: #00ff88; }
+
+    .event-card {
+      padding: 24px;
+      border-radius: 16px;
+      margin-bottom: 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      transition: transform 0.2s ease, border 0.2s ease;
+    }
+    .event-card:hover { transform: translateY(-2px); border: 1px solid rgba(255, 255, 255, 0.2); }
+    .entrada-accent { border-left: 5px solid #00ff88; box-shadow: -10px 0px 20px -10px rgba(0, 255, 136, 0.2); }
+    .saida-accent { border-left: 5px solid #ff4b4b; box-shadow: -10px 0px 20px -10px rgba(255, 75, 75, 0.2); }
+
+    .time-text { font-size: 2rem; font-weight: 700; color: #ffffff; letter-spacing: -1px; }
+    .msg-text { font-size: 1.1rem; font-weight: 500; color: rgba(255, 255, 255, 0.9); margin-bottom: 4px; }
+    .detail-text { font-size: 0.95rem; color: rgba(255, 255, 255, 0.5); font-weight: 400; }
+    .role-badge {
+      padding: 4px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .footer { text-align: center; color: gray; font-size: 0.8rem; margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Horário RSP</h1>
+    <p class="caption">Consulte seus horários de rendição.</p>
+
+    <div class="input-group">
+      <label for="operador">Identificação do Operador:</label>
+      <input type="text" id="operador" placeholder="Ex: 3S REBITTE" onkeyup="if(event.key === 'Enter') consultarEscala()">
+    </div>
+
+    <div id="loading" style="display: none; color: #00ff88; margin-bottom: 15px;">Buscando escala...</div>
+    <div id="resultados"></div>
+
+    <p class="footer">Sincronizado com a planilha oficial</p>
+  </div>
+
+  <script>
+    async function consultarEscala() {
+      const nome = document.getElementById('operador').value.trim();
+      if (!nome) return;
+
+      const loading = document.getElementById('loading');
+      const container = document.getElementById('resultados');
+
+      loading.style.display = 'block';
+      container.innerHTML = '';
+
+      try {
+        const response = await fetch(`/api/escala?nome=${encodeURIComponent(nome)}`);
+        const data = await response.json();
+
+        loading.style.display = 'none';
+
+        if (!response.ok) {
+          container.innerHTML = `<p style="color: #ff4b4b;">${data.detail || 'Erro ao carregar escala'}</p>`;
+          return;
+        }
+
+        if (!data.rendicoes || data.rendicoes.length === 0) {
+          container.innerHTML = `<p style="color: rgba(255,255,255,0.6);">Nenhuma rendição encontrada para "${nome}".</p>`;
+          return;
+        }
+
+        data.rendicoes.forEach(ev => {
+          const isEntrada = ev.tipo === 'entrada';
+          const accentClass = isEntrada ? 'entrada-accent' : 'saida-accent';
+          const iconColor = isEntrada ? '#00ff88' : '#ff4b4b';
+
+          const card = `
+            <div class="event-card ${accentClass}">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                  <p class="time-text">${ev.hora}</p>
+                  <p class="msg-text">${ev.msg}</p>
+                  <p class="detail-text">${ev.detalhe}</p>
+                </div>
+                <div style="text-align: right;">
+                  <span class="role-badge" style="color: ${iconColor}; border: 1px solid ${iconColor}44;">
+                    ${ev.funcao}
+                  </span>
+                </div>
+              </div>
+            </div>
+          `;
+          container.innerHTML += card;
+        });
+
+      } catch (err) {
+        loading.style.display = 'none';
+        container.innerHTML = `<p style="color: #ff4b4b;">Erro de conexão com o servidor.</p>`;
+      }
+    }
+  </script>
+</body>
+</html>
