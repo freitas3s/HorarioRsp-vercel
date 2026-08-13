@@ -30,6 +30,7 @@ def conectar_google_sheets():
     json_bytes = base64.b64decode(b64_key)
     info = json.loads(json_bytes.decode('utf-8'))
 
+
     scope = [
         "https://spreadsheets.google.com/feeds",
         "https://www.googleapis.com/auth/drive"
