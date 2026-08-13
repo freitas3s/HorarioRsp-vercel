@@ -28,7 +28,7 @@ def conectar_google_sheets():
 
     # 💡 Decodifica o Base64 recuperando o JSON original 100% íntegro
     json_bytes = base64.b64decode(b64_key)
-    info = json.loads(json_bytes.decode('utf-8'))
+    SERVICE_ACCOUNT_INFO = json.loads(json_bytes.decode('utf-8'))
 
 
     scope = [
@@ -36,7 +36,7 @@ def conectar_google_sheets():
         "https://www.googleapis.com/auth/drive"
     ]
 
-    creds = Credentials.from_service_account_info(info, scopes=scope)
+    creds = Credentials.from_service_account_info(SERVICE_ACCOUNT_INFO, scopes=scope)
     client = gspread.authorize(creds)
     return client
 
