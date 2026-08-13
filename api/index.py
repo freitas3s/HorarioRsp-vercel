@@ -1,5 +1,6 @@
 import os
 import json
+import base64
 from datetime import datetime, timedelta
 import pandas as pd
 import gspread
@@ -17,22 +18,17 @@ BOT_TOKEN = os.environ.get("8124239925:AAGiWLWqn8oPjEzji-5k9x7GXOxQ5DRQ39A")
 
 
 # --- CONEXÃO COM GOOGLE SHEETS ---
+
+
 def conectar_google_sheets():
-    client_email = os.environ.get("GOOGLE_CLIENT_EMAIL")
-    private_key = os.environ.get("GOOGLE_PRIVATE_KEY")
+    b64_key = os.environ.get("GDRIVE_KEY_BASE64")
 
-    if not client_email or not private_key:
-        raise Exception("Variáveis GOOGLE_CLIENT_EMAIL e/ou GOOGLE_PRIVATE_KEY não foram encontradas.")
+    if not b64_key:
+        raise Exception("A variável de ambiente GDRIVE_KEY_BASE64 não foi encontrada.")
 
-    # Substitui a barra invertida escapada por quebras de linha reais exigidas pelo OpenSSL
-    private_key_formatada = private_key.replace("\\n", "\n")
-
-    info = {
-        "type": "service_account",
-        "client_email": client_email,
-        "private_key": private_key_formatada,
-        "token_uri": "https://oauth2.googleapis.com/token"
-    }
+    # 💡 Decodifica o Base64 recuperando o JSON original 100% íntegro
+    json_bytes = base64.b64decode(b64_key)
+    info = json.loads(json_bytes.decode('utf-8'))
 
     scope = [
         "https://spreadsheets.google.com/feeds",
