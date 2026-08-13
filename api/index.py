@@ -18,18 +18,26 @@ BOT_TOKEN = os.environ.get("8124239925:AAGiWLWqn8oPjEzji-5k9x7GXOxQ5DRQ39A")
 
 # --- CONEXÃO COM GOOGLE SHEETS ---
 def conectar_google_sheets():
-    gdrive_key = os.environ.get("GDRIVE_KEY")
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+    client_email = os.environ.get("GOOGLE_CLIENT_EMAIL")
+    private_key = os.environ.get("GOOGLE_PRIVATE_KEY")
 
-    if not gdrive_key:
-        raise Exception("Chave de autenticação GDRIVE_KEY não encontrada nas variáveis de ambiente.")
+    if not client_email or not private_key:
+        raise Exception("Variáveis GOOGLE_CLIENT_EMAIL e/ou GOOGLE_PRIVATE_KEY não foram encontradas.")
 
-    # Converte a string em dicionário JSON
-    info = json.loads(gdrive_key) if isinstance(gdrive_key, str) else gdrive_key
+    # Substitui a barra invertida escapada por quebras de linha reais exigidas pelo OpenSSL
+    private_key_formatada = private_key.replace("\\n", "\n")
 
-    # 💡 CORREÇÃO CRÍTICA: Ajusta os caracteres de quebra de linha da chave privada
-    if "private_key" in info:
-        info["private_key"] = info["private_key"].replace("\\n", "\n")
+    info = {
+        "type": "service_account",
+        "client_email": client_email,
+        "private_key": private_key_formatada,
+        "token_uri": "https://oauth2.googleapis.com/token"
+    }
+
+    scope = [
+        "https://spreadsheets.google.com/feeds",
+        "https://www.googleapis.com/auth/drive"
+    ]
 
     creds = Credentials.from_service_account_info(info, scopes=scope)
     client = gspread.authorize(creds)
