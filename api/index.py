@@ -24,11 +24,16 @@ def conectar_google_sheets():
     if not gdrive_key:
         raise Exception("Chave de autenticação GDRIVE_KEY não encontrada nas variáveis de ambiente.")
 
+    # Converte a string em dicionário JSON
     info = json.loads(gdrive_key) if isinstance(gdrive_key, str) else gdrive_key
+
+    # 💡 CORREÇÃO CRÍTICA: Ajusta os caracteres de quebra de linha da chave privada
+    if "private_key" in info:
+        info["private_key"] = info["private_key"].replace("\\n", "\n")
+
     creds = Credentials.from_service_account_info(info, scopes=scope)
     client = gspread.authorize(creds)
     return client
-
 
 # --- CADASTRO AUTOMÁTICO DE USUÁRIOS DO TELEGRAM ---
 def get_ou_criar_aba_cadastros(client):
