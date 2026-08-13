@@ -212,28 +212,16 @@ def analisar_rendicoes_v2(df, nome_busca, turno_nome):
 
 @app.get("/api/escala")
 def consultar_escala(nome: str = Query(...)):
-    # try:
-    #     df_escala, turno_nome = buscar_escala_atual()
-    #     if df_escala is None:
-    #         raise HTTPException(status_code=404, detail="Escala não encontrada.")
-        
-    #     rendicoes = analisar_rendicoes_v2(df_escala, nome, turno_nome)
-    #     return {"usuario": nome, "turno": turno_nome, "rendicoes": rendicoes}
-    # except Exception as e:
-    #     raise HTTPException(status_code=500, detail=str(e))
-
     try:
-        client = conectar_google_sheets()
-        # Tenta abrir a planilha para testar
-        doc = client.open_by_key("ID_DA_SUA_PLANILHA")
-        return {"status": "sucesso", "mensagem": "Conexão com Google Sheets OK!"}
+        df_escala, turno_nome = buscar_escala_atual()
+        if df_escala is None:
+            raise HTTPException(status_code=404, detail="Escala não encontrada.")
+        
+        rendicoes = analisar_rendicoes_v2(df_escala, nome, turno_nome)
+        return {"usuario": nome, "turno": turno_nome, "rendicoes": rendicoes}
     except Exception as e:
-        # Retorna o erro exato na tela para sabermos o que corrigir
-        return {
-            "status": "erro",
-            "tipo_erro": type(e).__name__,
-            "detalhes": str(e)
-        }, 500
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/api/telegram-webhook")
 async def telegram_webhook(request: Request):
