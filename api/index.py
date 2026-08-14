@@ -1,6 +1,6 @@
 import os
 import json
-import base64
+from pathlib import Path
 from datetime import datetime, timedelta
 import pandas as pd
 import gspread
@@ -19,24 +19,24 @@ BOT_TOKEN = os.environ.get("8124239925:AAGiWLWqn8oPjEzji-5k9x7GXOxQ5DRQ39A")
 
 # --- CONEXÃO COM GOOGLE SHEETS ---
 
-
 def conectar_google_sheets():
-    b64_key = os.environ.get("GDRIVE_KEY_BASE64")
+    # Pega a pasta onde está este script (api/) e sobe 1 nível para a raiz do projeto
+    raiz_do_projeto = Path(__file__).parent.parent
+    caminho_json = raiz_do_projeto / "google_credentials.json"
 
-    if not b64_key:
-        raise Exception("A variável de ambiente GDRIVE_KEY_BASE64 não foi encontrada.")
+    # Caso o arquivo tenha sido colocado direto dentro da pasta api/
+    if not caminho_json.exists():
+        caminho_json = Path(__file__).parent / "google_credentials.json"
 
-    # 💡 Decodifica o Base64 recuperando o JSON original 100% íntegro
-    json_bytes = base64.b64decode(b64_key)
-    SERVICE_ACCOUNT_INFO = json.loads(json_bytes.decode('utf-8'))
-
+    if not caminho_json.exists():
+        raise FileNotFoundError(f"Arquivo google_credentials.json não foi encontrado em: {caminho_json}")
 
     scope = [
         "https://spreadsheets.google.com/feeds",
         "https://www.googleapis.com/auth/drive"
     ]
 
-    creds = Credentials.from_service_account_info(SERVICE_ACCOUNT_INFO, scopes=scope)
+    creds = Credentials.from_service_account_file(str(caminho_json), scopes=scope)
     client = gspread.authorize(creds)
     return client
 
