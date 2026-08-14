@@ -20,16 +20,15 @@ BOT_TOKEN = os.environ.get("8124239925:AAGiWLWqn8oPjEzji-5k9x7GXOxQ5DRQ39A")
 # --- CONEXÃO COM GOOGLE SHEETS ---
 
 def conectar_google_sheets():
-    # Pega a pasta onde está este script (api/) e sobe 1 nível para a raiz do projeto
-    raiz_do_projeto = Path(__file__).parent.parent
-    caminho_json = raiz_do_projeto / "google_credentials.json"
+    # Procura o arquivo dentro da própria pasta api/
+    caminho_json = Path(__file__).parent / "google_credentials.json"
 
-    # Caso o arquivo tenha sido colocado direto dentro da pasta api/
+    # Se por acaso não achar, tenta na raiz do projeto
     if not caminho_json.exists():
-        caminho_json = Path(__file__).parent / "google_credentials.json"
+        caminho_json = Path(__file__).parent.parent / "google_credentials.json"
 
     if not caminho_json.exists():
-        raise FileNotFoundError(f"Arquivo google_credentials.json não foi encontrado em: {caminho_json}")
+        raise FileNotFoundError(f"O arquivo google_credentials.json não existe no servidor em: {caminho_json}")
 
     scope = [
         "https://spreadsheets.google.com/feeds",
@@ -37,8 +36,7 @@ def conectar_google_sheets():
     ]
 
     creds = Credentials.from_service_account_file(str(caminho_json), scopes=scope)
-    client = gspread.authorize(creds)
-    return client
+    return gspread.authorize(creds)
 
 # --- CADASTRO AUTOMÁTICO DE USUÁRIOS DO TELEGRAM ---
 def get_ou_criar_aba_cadastros(client):
