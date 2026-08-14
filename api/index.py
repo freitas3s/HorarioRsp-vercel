@@ -22,15 +22,18 @@ def conectar_google_sheets():
         "https://www.googleapis.com/auth/drive"
     ]
 
-    b64_creds = os.environ.get("GOOGLE_CREDENTIALS_BASE64")
+    b64_creds = os.getenv("GOOGLE_CREDENTIALS_BASE64")
+    
     if not b64_creds:
+        # Pega todas as variáveis que tenham "GOOGLE", "CRED" ou "BASE64" para ver se há erro no nome
+        chaves_encontradas = [k for k in os.environ.keys() if any(x in k for x in ["GOOGLE", "CRED", "BASE64"])]
+        
         raise HTTPException(
             status_code=500, 
-            detail="A variável GOOGLE_CREDENTIALS_BASE64 não foi encontrada na Vercel."
+            detail=f"Variável não encontrada! Chaves parecidas no ambiente: {chaves_encontradas}"
         )
 
     try:
-        # Decodifica a string Base64 de volta para o JSON original
         json_bytes = base64.b64decode(b64_creds)
         service_account_info = json.loads(json_bytes.decode("utf-8"))
         
@@ -41,7 +44,8 @@ def conectar_google_sheets():
             status_code=500, 
             detail=f"Erro ao decodificar credenciais Base64: {str(e)}"
         )
-# --- CADASTRO AUTOMÁTICO DE USUÁRIOS DO TELEGRAM ---
+
+    # --- CADASTRO AUTOMÁTICO DE USUÁRIOS DO TELEGRAM ---
 def get_ou_criar_aba_cadastros(client):
     sh = client.open_by_key(SPREADSHEET_ID)
     try:
