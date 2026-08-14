@@ -13,7 +13,7 @@ app = FastAPI()
 SPREADSHEET_ID = "1Li5g5tWWL8VbxrVbhXTFNBu3aLzM8_ETXXixTMVgA_8"
 
 # Token do seu Bot no Telegram
-BOT_TOKEN = os.environ.get("8124239925:AAGiWLWqn8oPjEzji-5k9x7GXOxQ5DRQ39A")
+BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "8124239925:AAGiWLWqn8oPjEzji-5k9x7GXOxQ5DRQ39A")
 
 json_string = os.getenv("GOOGLE_CREDENTIALS_JSON", "{}").replace("\\n", "\n")
 SERVICE_ACCOUNT_INFO = json.loads(json_string)

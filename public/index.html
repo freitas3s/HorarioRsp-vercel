@@ -90,7 +90,14 @@
 
       try {
         const response = await fetch(`/api/escala?nome=${encodeURIComponent(nome)}`);
-        const data = await response.json();
+        
+        // Tenta ler o JSON, mas trata o erro caso a Vercel retorne HTML
+        let data;
+        try {
+          data = await response.json();
+        } catch {
+          throw new Error("O servidor retornou uma resposta inválida (Erro na API).");
+        }
 
         loading.style.display = 'none';
 
@@ -103,7 +110,6 @@
           container.innerHTML = `<p style="color: rgba(255,255,255,0.6);">Nenhuma rendição encontrada para "${nome}".</p>`;
           return;
         }
-
         data.rendicoes.forEach(ev => {
           const isEntrada = ev.tipo === 'entrada';
           const accentClass = isEntrada ? 'entrada-accent' : 'saida-accent';
@@ -129,10 +135,10 @@
         });
 
       } catch (err) {
-        loading.style.display = 'none';
-        container.innerHTML = `<p style="color: #ff4b4b;">Erro de conexão com o servidor.</p>`;
+          loading.style.display = 'none';
+          container.innerHTML = `<p style="color: #ff4b4b;">${err.message || 'Erro de conexão com o servidor.'}</p>`;
+        }
       }
-    }
   </script>
 </body>
 </html>
