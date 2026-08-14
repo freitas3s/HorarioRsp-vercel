@@ -22,7 +22,7 @@ def conectar_google_sheets():
         "https://www.googleapis.com/auth/drive"
     ]
 
-    b64_creds = os.getenv("GOOGLE_CREDENTIALS_BASE64")
+    b64_creds = os.environ.get("GOOGLE_CREDENTIALS_BASE64")
     if not b64_creds:
         raise HTTPException(
             status_code=500, 
