@@ -6,6 +6,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 from fastapi import FastAPI, HTTPException, Query, Request, Body
 import requests
+import base64
 
 app = FastAPI()
 
@@ -21,27 +22,24 @@ def conectar_google_sheets():
         "https://www.googleapis.com/auth/drive"
     ]
 
-    json_string = os.getenv("GOOGLE_CREDENTIALS_JSON", "{}")
-    if not json_string or json_string == "{}":
+    b64_creds = os.getenv("GOOGLE_CREDENTIALS_BASE64")
+    if not b64_creds:
         raise HTTPException(
             status_code=500, 
-            detail="A variável GOOGLE_CREDENTIALS_JSON não está configurada na Vercel."
+            detail="A variável GOOGLE_CREDENTIALS_BASE64 não foi encontrada na Vercel."
         )
 
     try:
-        # Carrega o JSON em modo flexível
-        service_account_info = json.loads(json_string, strict=False)
+        # Decodifica a string Base64 de volta para o JSON original
+        json_bytes = base64.b64decode(b64_creds)
+        service_account_info = json.loads(json_bytes.decode("utf-8"))
         
-        # Garante que as quebras de linha da chave privada fiquem no padrão exato exigido pelo Google
-        if "private_key" in service_account_info:
-            service_account_info["private_key"] = service_account_info["private_key"].replace("\\n", "\n")
-
         creds = Credentials.from_service_account_info(service_account_info, scopes=scope)
         return gspread.authorize(creds)
     except Exception as e:
         raise HTTPException(
             status_code=500, 
-            detail=f"Erro ao processar as credenciais do Google: {str(e)}"
+            detail=f"Erro ao decodificar credenciais Base64: {str(e)}"
         )
 # --- CADASTRO AUTOMÁTICO DE USUÁRIOS DO TELEGRAM ---
 def get_ou_criar_aba_cadastros(client):
