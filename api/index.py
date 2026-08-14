@@ -15,20 +15,31 @@ SPREADSHEET_ID = "1Li5g5tWWL8VbxrVbhXTFNBu3aLzM8_ETXXixTMVgA_8"
 # Token do seu Bot no Telegram
 BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "8124239925:AAGiWLWqn8oPjEzji-5k9x7GXOxQ5DRQ39A")
 
-json_string = os.getenv("GOOGLE_CREDENTIALS_JSON", "{}").replace("\\n", "\n")
-SERVICE_ACCOUNT_INFO = json.loads(json_string)
-
 def conectar_google_sheets():
     scope = [
         "https://spreadsheets.google.com/feeds",
         "https://www.googleapis.com/auth/drive"
     ]
 
-    # Usa from_service_account_info direto do dicionário mantendo sua lógica
-    creds = Credentials.from_service_account_info(SERVICE_ACCOUNT_INFO, scopes=scope)
-    client = gspread.authorize(creds)
-    return client
+    json_string = os.getenv("GOOGLE_CREDENTIALS_JSON", "{}")
+    if not json_string or json_string == "{}":
+        raise HTTPException(
+            status_code=500, 
+            detail="A variável GOOGLE_CREDENTIALS_JSON não está configurada nas Environment Variables da Vercel."
+        )
 
+    try:
+        # Tratamento com strict=False para ignorar caracteres de controle em strings do JSON
+        json_limpo = json_string.replace("\\n", "\n")
+        service_account_info = json.loads(json_limpo, strict=False)
+        
+        creds = Credentials.from_service_account_info(service_account_info, scopes=scope)
+        return gspread.authorize(creds)
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Erro ao processar as credenciais do Google: {str(e)}"
+        )
 
 # --- CADASTRO AUTOMÁTICO DE USUÁRIOS DO TELEGRAM ---
 def get_ou_criar_aba_cadastros(client):
