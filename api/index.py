@@ -6,9 +6,6 @@ import gspread
 from google.oauth2.service_account import Credentials
 from fastapi import FastAPI, HTTPException, Query, Request, Body
 import requests
-# Importa as credenciais diretamente do outro arquivo Python
-from api.google_credentials import SERVICE_ACCOUNT_INFO
-
 
 app = FastAPI()
 
