@@ -25,14 +25,17 @@ def conectar_google_sheets():
     if not json_string or json_string == "{}":
         raise HTTPException(
             status_code=500, 
-            detail="A variável GOOGLE_CREDENTIALS_JSON não está configurada nas Environment Variables da Vercel."
+            detail="A variável GOOGLE_CREDENTIALS_JSON não está configurada na Vercel."
         )
 
     try:
-        # Tratamento com strict=False para ignorar caracteres de controle em strings do JSON
-        json_limpo = json_string.replace("\\n", "\n")
-        service_account_info = json.loads(json_limpo, strict=False)
+        # Carrega o JSON em modo flexível
+        service_account_info = json.loads(json_string, strict=False)
         
+        # Garante que as quebras de linha da chave privada fiquem no padrão exato exigido pelo Google
+        if "private_key" in service_account_info:
+            service_account_info["private_key"] = service_account_info["private_key"].replace("\\n", "\n")
+
         creds = Credentials.from_service_account_info(service_account_info, scopes=scope)
         return gspread.authorize(creds)
     except Exception as e:
@@ -40,7 +43,6 @@ def conectar_google_sheets():
             status_code=500, 
             detail=f"Erro ao processar as credenciais do Google: {str(e)}"
         )
-
 # --- CADASTRO AUTOMÁTICO DE USUÁRIOS DO TELEGRAM ---
 def get_ou_criar_aba_cadastros(client):
     sh = client.open_by_key(SPREADSHEET_ID)
