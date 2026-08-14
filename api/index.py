@@ -1,6 +1,5 @@
 import os
 import json
-from pathlib import Path
 from datetime import datetime, timedelta
 import pandas as pd
 import gspread
@@ -19,8 +18,8 @@ SPREADSHEET_ID = "1Li5g5tWWL8VbxrVbhXTFNBu3aLzM8_ETXXixTMVgA_8"
 # Token do seu Bot no Telegram
 BOT_TOKEN = os.environ.get("8124239925:AAGiWLWqn8oPjEzji-5k9x7GXOxQ5DRQ39A")
 
-
-# --- CONEXÃO COM GOOGLE SHEETS ---
+json_string = os.getenv("GOOGLE_CREDENTIALS_JSON", "{}").replace("\\n", "\n")
+SERVICE_ACCOUNT_INFO = json.loads(json_string)
 
 def conectar_google_sheets():
     scope = [
@@ -28,10 +27,11 @@ def conectar_google_sheets():
         "https://www.googleapis.com/auth/drive"
     ]
 
-    # Usa from_service_account_info direto do dicionário
+    # Usa from_service_account_info direto do dicionário mantendo sua lógica
     creds = Credentials.from_service_account_info(SERVICE_ACCOUNT_INFO, scopes=scope)
     client = gspread.authorize(creds)
     return client
+
 
 # --- CADASTRO AUTOMÁTICO DE USUÁRIOS DO TELEGRAM ---
 def get_ou_criar_aba_cadastros(client):
