@@ -102,6 +102,17 @@ def buscar_chat_id(operador):
 
 
 # --- AUXILIARES E LÓGICA DA ESCALA ---
+
+# --- FUNÇÃO AUXILIAR DE FILTRO TEMPORAL ---
+def tempo_em_minutos(hora_str, turno_nome):
+    """Converte o horário HH:MM em minutos. Trata a virada de dia no turno PERNOITE."""
+    h, m = map(int, hora_str.split(":"))
+    minutos = h * 60 + m
+    # No turno PERNOITE, horários de madrugada (ex: 01:00) ganham +24h em minutos
+    if turno_nome == "PERNOITE" and h < 12:
+        minutos += 1440
+    return minutos
+
 def gerar_horarios_base(turno):
     if turno == "MANHÃ":
         inicio, fim = "06:45", "14:00"
@@ -263,9 +274,9 @@ async def telegram_webhook(request: Request):
             if len(partes) > 1:
                 operador = partes[1].upper().strip()
                 salvar_cadastro_telegram(operador, chat_id)
-                msg = f"✅ Cadastro realizado com sucesso!\nOperador: *{operador}*\nVocê receberá notificações aqui sempre que sua escala mudar."
+                msg = f"✅ Cadastro realizado com sucesso!\nOperador: *{operador}*\nVocê receberá notificações aqui sempre que seu horario mudar."
             else:
-                msg = "Para se cadastrar, envie sua identificação da escala assim:\n`/start 3S REBITTE`"
+                msg = "Para se cadastrar, envie sua identificação do horario assim:\n`/start 3S REBITTE`"
             
             requests.post(f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage", json={
                 "chat_id": chat_id, "text": msg, "parse_mode": "Markdown"
@@ -273,24 +284,57 @@ async def telegram_webhook(request: Request):
     return {"status": "ok"}
 
 
+# --- ENDPOINT DO WEBHOOK ---
 @app.post("/api/webhook-planilha")
 def webhook_planilha(data: dict = Body(...)):
-    """Recebe avisos do Google Sheets quando a planilha for editada e notifica o Telegram."""
+    """Recebe avisos do Google Sheets e notifica o operador APENAS sobre os próximos horários."""
     operador = data.get("operador", "").upper().strip()
-    alteracao = data.get("alteracao", "")
 
     chat_id = buscar_chat_id(operador)
     if not chat_id:
         return {"status": "ignorado", "motivo": f"Chat ID não cadastrado para {operador}"}
 
-    mensagem = (
-        f"⚠️ *Alteração na Escala RSP*\n\n"
-        f"Olá, *{operador}*!\n"
-        f"Sua escala foi alterada na planilha:\n\n"
-        f"📌 {alteracao}"
-    )
+    try:
+        df_escala, turno_nome = buscar_escala_atual()
+        
+        if df_escala is None:
+            resumo_rendicoes = "Não foi possível carregar seu horário."
+        else:
+            # 1. Busca todas as rendições calculadas na planilha
+            todas_rendicoes = analisar_rendicoes_v2(df_escala, operador, turno_nome)
+            
+            # 2. Obtém a hora atual no horário de Brasília (UTC-3)
+            agora = datetime.utcnow() - timedelta(hours=3)
+            hora_atual_str = agora.strftime("%H:%M")
+            minutos_agora = tempo_em_minutos(hora_atual_str, turno_nome)
 
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    res = requests.post(url, json={"chat_id": chat_id, "text": mensagem, "parse_mode": "Markdown"})
+            # 3. FILTRO: Mantém apenas os horários iguais ou posteriores ao horário atual
+            rendicoes_futuras = [
+                r for r in todas_rendicoes 
+                if tempo_em_minutos(r["hora"], turno_nome) >= minutos_agora
+            ]
 
-    return {"status": "sucesso" if res.status_code == 200 else "erro"}
+            if not rendicoes_futuras:
+                resumo_rendicoes = "Você não possui mais horários de rendição pendentes para o restante deste turno."
+            else:
+                linhas = []
+                for r in rendicoes_futuras:
+                    linhas.append(f"⏰ *{r['hora']}* — {r['msg']}\n   ↳ _{r['detalhe']}_")
+                resumo_rendicoes = "\n\n".join(linhas)
+
+        # Monta a mensagem final
+        mensagem = (
+            f"⚠️ *Seu horário foi atualizado!*\n\n"
+            f"Olá, *{operador}*!\n"
+            f"Turno: *{turno_nome}*\n\n"
+            f"📋 *Seus próximos horários de rendição:*\n\n"
+            f"{resumo_rendicoes}"
+        )
+
+        url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+        res = requests.post(url, json={"chat_id": chat_id, "text": mensagem, "parse_mode": "Markdown"})
+
+        return {"status": "sucesso" if res.status_code == 200 else "erro"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
