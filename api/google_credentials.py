@@ -1,13 +1,14 @@
-{
+# api/google_credentials.py
+
+CREDENTIALS = {
   "type": "service_account",
-  "project_id": "healthy-keyword-475022-f9",
-  "private_key_id": "21208b8015109cb3b1130da2b28ba56c8171c250",
+  "project_id": "seu-project-id",
+  "private_key_id": "sua-private-key-id",
   "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDBDfQZxHcCaOFO\nW/QAaTIFfSLQvuJJnrN4Dg/mTOt0HsY8xME7EieiJJRkH1Le2WgBRjqg2CoQNz0/\ncV+EP0KMB7LaORldrUYOwTtEiknGE+XT4cYs8TWcIlUKYhBMd1pQ35ovB5NRIvF2\nR3WR3jxwhnQmnCyx6xLrGtBgJzmbsgPrQWSjmJJdpOJztkPNmKhEGyc20HoSUKyQ\n1k6xDSFelkAthElMzH9z9bk/dmiNvA+z1/QeIL0YjtJFXzbxaOLS9i/rBwfYygYl\n1EmGcXOZvkNh4zKV7uMdkHs4YYmKQJav5coJH54lqTAXFF9/yqdUlDj6w0H912/4\noAUWx3ItAgMBAAECggEAHjV/7NJMlHYd9M7jGSIHlPVLuozMHcdgKllPop2HEJDK\nO3McZjvFM5RJcNC3/S2ESVgYei0pM91jpPxUJ9O6/EIuJK4KVUQfx3+e4G71SVy5\nZNTvrP5XrGVw7OLYeGa1csdH5LO+Q9QrIvOJUbiMDkhJKkuGRkGpywaonws0SAj8\nP623SZRoFyjP5YAyrlXdCa576VT4ZOb8jIwi4TXeaT+Pf0/4cpkkpd8NB1pzurqm\nsQJ5KHj4rePBMrlk7DcxQDsKhhQe5VevuCYNYlFZuT75F0mJf65/Iow+uCQO2FIv\nJFZ+SjK1uKERnR+cqdxhMFPn2CMiKGGip9bqAKHSfwKBgQDsglFeWAsftWsfZbbr\nVQBOYIqGIlI4V8iSvqTn1GcGazkvj3NOI6IZ7kBk4Yputwg7uxSQJpjj6VgO0oTP\nRoH0tw6KDnd57WOBL1FzXt6P/+X9w0ZpxuUGM1j8YmnrBVG6kX2VZKXNKgCH+XDX\n2wa+9I594c56tO9FiP1CY3GIwwKBgQDQ9t2i0YMDZB/wwRE+Y1aG29NsfeCnxbjj\nXhbnxlnE+75V5a2ASGI+xWAu5DX7HZeUhjD6aG9o8iB7VcxME5gZA5iYm3yjH1Rv\nsLMJANvNBg375bMk5nQ21KOlL5+VUstIxzMSo1gdNi+K4iijViwZFdNkjLKiviJf\n3JshRZTqTwKBgCF1Afu9qr0uldvYMLszyBpOT+pPup/b0zTnIT7mbjibPHi860vX\ngJv4d0WOHl4xKEoC2hLWUvSS0vEt2LnVuJacusLO7xnheh0RS41tk0B9q9RtJm3a\nRBXPd7wkU+V6WChzYneayFWwpmiV4d+3TUoAIJQwOFxlch+9FE6q8KmvAoGAdu8b\nJNGkhOiW+VuZ6e12URmLE2Pt2u/BlL93wAF4FJLIOXGZN7t7F4kVfnrrcnrcTG+4\nLr4EMzIkZK5nsiEw34PZdXqCDQIG9+8VZ5lygRXiHa4WMXltScvrPFiHtuDBzTF7\nky8fNrkhhCXGxXiFbt2qTL976P7Y58DTFrPY1ycCgYEAvQNA/dtgnmpUJZ9CZqtu\ndXIywGRXCuMDpS8Bqte72B9q4rUEI96lXZXauw1uEM88OdLsuXXMcNxDlarZeDPi\nwJxuulvVPVMgXI621O5NS4jemY597iLNINQYv4xMVlfNfK44BspBhtBY7PqXHEfm\n04TyyQdNmtAooIIuSeWCFOw=\n-----END PRIVATE KEY-----\n",
   "client_email": "escalasrsp@healthy-keyword-475022-f9.iam.gserviceaccount.com",
-  "client_id": "105277777773748809804",
+  "client_id": "123456789...",
   "auth_uri": "https://accounts.google.com/o/oauth2/auth",
   "token_uri": "https://oauth2.googleapis.com/token",
   "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/escalasrsp%40healthy-keyword-475022-f9.iam.gserviceaccount.com",
-  "universe_domain": "googleapis.com"
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/..."
 }

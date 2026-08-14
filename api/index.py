@@ -7,6 +7,9 @@ import gspread
 from google.oauth2.service_account import Credentials
 from fastapi import FastAPI, HTTPException, Query, Request, Body
 import requests
+# Importa as credenciais diretamente do outro arquivo Python
+from api.google_credentials import CREDENTIALS
+
 
 app = FastAPI()
 
@@ -20,23 +23,15 @@ BOT_TOKEN = os.environ.get("8124239925:AAGiWLWqn8oPjEzji-5k9x7GXOxQ5DRQ39A")
 # --- CONEXÃO COM GOOGLE SHEETS ---
 
 def conectar_google_sheets():
-    # Procura o arquivo dentro da própria pasta api/
-    caminho_json = Path(__file__).parent / "google_credentials.json"
-
-    # Se por acaso não achar, tenta na raiz do projeto
-    if not caminho_json.exists():
-        caminho_json = Path(__file__).parent.parent / "google_credentials.json"
-
-    if not caminho_json.exists():
-        raise FileNotFoundError(f"O arquivo google_credentials.json não existe no servidor em: {caminho_json}")
-
     scope = [
         "https://spreadsheets.google.com/feeds",
         "https://www.googleapis.com/auth/drive"
     ]
 
-    creds = Credentials.from_service_account_file(str(caminho_json), scopes=scope)
-    return gspread.authorize(creds)
+    # Usa from_service_account_info direto do dicionário
+    creds = Credentials.from_service_account_info(CREDENTIALS, scopes=scope)
+    client = gspread.authorize(creds)
+    return client
 
 # --- CADASTRO AUTOMÁTICO DE USUÁRIOS DO TELEGRAM ---
 def get_ou_criar_aba_cadastros(client):
