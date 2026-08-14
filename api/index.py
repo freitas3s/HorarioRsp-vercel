@@ -22,27 +22,47 @@ def conectar_google_sheets():
         "https://www.googleapis.com/auth/drive"
     ]
 
-    b64_creds = os.getenv("GOOGLE_CREDENTIALS_BASE64")
+    raw_env = os.getenv("GOOGLE_CREDENTIALS_JSON") or os.getenv("GOOGLE_CREDENTIALS_BASE64")
     
-    if not b64_creds:
-        # Pega todas as variáveis que tenham "GOOGLE", "CRED" ou "BASE64" para ver se há erro no nome
-        chaves_encontradas = [k for k in os.environ.keys() if any(x in k for x in ["GOOGLE", "CRED", "BASE64"])]
-        
+    if not raw_env or raw_env == "{}":
         raise HTTPException(
             status_code=500, 
-            detail=f"Variável não encontrada! Chaves parecidas no ambiente: {chaves_encontradas}"
+            detail="A variável de credenciais do Google não foi encontrada na Vercel."
         )
 
+    service_account_info = None
+
+    # TENTATIVA 1: Decodificar Base64
     try:
-        json_bytes = base64.b64decode(b64_creds)
+        json_bytes = base64.b64decode(raw_env)
         service_account_info = json.loads(json_bytes.decode("utf-8"))
-        
+    except Exception:
+        service_account_info = None
+
+    # TENTATIVA 2: Decodificar JSON direto
+    if not service_account_info:
+        try:
+            json_limpo = raw_env.replace("\\n", "\n")
+            service_account_info = json.loads(json_limpo, strict=False)
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Falha ao ler o formato da chave: {str(e)}"
+            )
+
+    # CORREÇÃO CRÍTICA: Trata as quebras de linha da chave privada em ambos os casos
+    if service_account_info and "private_key" in service_account_info:
+        pk = service_account_info["private_key"]
+        # Converte qualquer \\n literal em quebra de linha real \n
+        service_account_info["private_key"] = pk.replace("\\n", "\n")
+
+    try:
         creds = Credentials.from_service_account_info(service_account_info, scopes=scope)
         return gspread.authorize(creds)
     except Exception as e:
         raise HTTPException(
             status_code=500, 
-            detail=f"Erro ao decodificar credenciais Base64: {str(e)}"
+            detail=f"Erro de autenticação no Google: {str(e)}"
         )
 
     # --- CADASTRO AUTOMÁTICO DE USUÁRIOS DO TELEGRAM ---
