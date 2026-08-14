@@ -1,6 +1,6 @@
 # api/google_credentials.py
 
-CREDENTIALS = {
+SERVICE_ACCOUNT_INFO = {
   "type": "service_account",
   "project_id": "seu-project-id",
   "private_key_id": "sua-private-key-id",

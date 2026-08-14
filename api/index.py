@@ -8,7 +8,7 @@ from google.oauth2.service_account import Credentials
 from fastapi import FastAPI, HTTPException, Query, Request, Body
 import requests
 # Importa as credenciais diretamente do outro arquivo Python
-from api.google_credentials import CREDENTIALS
+from api.google_credentials import SERVICE_ACCOUNT_INFO
 
 
 app = FastAPI()
@@ -29,7 +29,7 @@ def conectar_google_sheets():
     ]
 
     # Usa from_service_account_info direto do dicionário
-    creds = Credentials.from_service_account_info(CREDENTIALS, scopes=scope)
+    creds = Credentials.from_service_account_info(SERVICE_ACCOUNT_INFO, scopes=scope)
     client = gspread.authorize(creds)
     return client
 
