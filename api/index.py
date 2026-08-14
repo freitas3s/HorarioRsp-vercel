@@ -210,8 +210,10 @@ def consultar_escala(nome: str = Query(...)):
         rendicoes = analisar_rendicoes_v2(df_escala, nome, turno_nome)
         return {"usuario": nome, "turno": turno_nome, "rendicoes": rendicoes}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
+        # Retorna o nome da exceção e a mensagem real do erro
+        mensagem_erro = f"{type(e).__name__}: {str(e)}"
+        print(f"ERRO BACKEND: {mensagem_erro}")
+        raise HTTPException(status_code=500, detail=mensagem_erro)
 
 @app.post("/api/telegram-webhook")
 async def telegram_webhook(request: Request):
