@@ -14,7 +14,7 @@ app = FastAPI()
 SPREADSHEET_ID = "1Li5g5tWWL8VbxrVbhXTFNBu3aLzM8_ETXXixTMVgA_8"
 
 # Token do seu Bot no Telegram
-BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "8868772707:AAF5kFiRV36s_xfAIvK5co22CKKB0VZNnSQ")
+BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "8395467764:AAHK37ZmR39vT6yE9Fy4By3tQA8_h2tCZe4")
 
 def conectar_google_sheets():
     scope = [
